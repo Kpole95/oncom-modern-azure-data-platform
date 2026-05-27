@@ -6,7 +6,7 @@
 
 # COMMAND ----------
 
-# %run ./ADLS_oauth
+# MAGIC %run ./ADLS_oauth
 
 # COMMAND ----------
 
@@ -96,4 +96,4 @@ display(dfParties)
 # Verify Parties Schema
 #This verifies that the DataFrame has the expected column names and Spark data types.
 
-df.printSchema()
+dfParties.printSchema()
