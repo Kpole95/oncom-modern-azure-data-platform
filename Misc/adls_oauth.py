@@ -115,3 +115,4 @@ print("ADLS OAuth configuration completed.")
 # Test whether Databricks can list the ADLS container root.
 
 display(dbutils.fs.ls("abfss://oaonoperationsdev@stoncomdev001.dfs.core.windows.net/"))
+
