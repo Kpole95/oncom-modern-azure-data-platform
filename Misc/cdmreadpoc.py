@@ -97,3 +97,4 @@ display(dfParties)
 #This verifies that the DataFrame has the expected column names and Spark data types.
 
 dfParties.printSchema()
+
