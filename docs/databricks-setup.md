@@ -66,7 +66,7 @@ Source files are headerless CSVs. A custom schema-driven reader handles CDM-styl
 
 ---
 
-## Bronze Layer — Unity Catalog Registration
+## Bronze Layer - Unity Catalog Registration
 
 Raw Delta outputs are registered as managed Bronze tables in Unity Catalog, making them queryable via Spark SQL.
 
@@ -76,7 +76,7 @@ Raw Delta outputs are registered as managed Bronze tables in Unity Catalog, maki
 
 ---
 
-## Silver Layer — Dimensions and Facts
+## Silver Layer - Dimensions and Facts
 
 Silver notebooks read from Bronze schemas and produce analytics-ready dimension and fact tables.
 
