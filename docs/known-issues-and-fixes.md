@@ -2,103 +2,82 @@
 
 ## CDM Connector Compatibility
 
-### Problem
+**Problem:** The legacy Spark CDM connector was not reliable on the Databricks runtime used for the project.
 
-The legacy Spark CDM connector was not reliable in the Databricks runtime used for the project.
+**Fix:** A custom schema-driven ingestion approach was implemented using CDM JSON metadata and Spark `StructType`. This eliminated connector and runtime compatibility issues entirely.
 
-### Fix
-
-A custom schema-driven ingestion approach was implemented using CDM JSON metadata and Spark `StructType`.
+---
 
 ## Headerless CSV Files
 
-### Problem
+**Problem:** Source CSV files did not contain column headers, so normal CSV header detection could not be used.
 
-Source CSV files did not contain headers.
+**Fix:** Schemas were read from CDM metadata files and applied explicitly during ingestion via a custom reader.
 
-### Fix
-
-Schemas were read or defined from CDM metadata and applied explicitly during ingestion.
+---
 
 ## Mixed Source Layouts
 
-### Problem
+**Problem:** Some source entities were stored as entity folders, while others were direct CSV files, requiring different path handling.
 
-Some source entities were stored as folders, while others were direct CSV files.
+**Fix:** The ingestion utility was updated to support both folder-based and file-based layouts dynamically.
 
-### Fix
-
-The ingestion utility was adjusted to support both folder-based and file-based layouts.
+---
 
 ## ADLS OAuth Configuration
 
-### Problem
+**Problem:** Databricks compute restrictions caused Spark filesystem configuration issues when setting OAuth credentials.
 
-Databricks compute restrictions caused Spark filesystem configuration issues.
+**Fix:** A compatible Databricks compute mode was used, and credentials were retrieved through a Key Vault-backed Databricks secret scope rather than set at the session level.
 
-### Fix
-
-A suitable Databricks compute mode was used, and credentials were read through Key Vault-backed secret scope.
+---
 
 ## Duplicate Dimension Keys
 
-### Problem
+**Problem:** Power BI requires unique dimension keys for valid relationships, but some dimensions produced duplicate key values.
 
-Power BI requires unique dimension keys, but some dimensions produced duplicates.
+**Fix:** Deduplication was implemented in the Silver layer before dimension tables were exposed to reporting.
 
-### Fix
-
-Deduplication was handled in the Silver layer before exposing tables to reporting.
+---
 
 ## Numeric Type Issues
 
-### Problem
+**Problem:** Some numeric measures (e.g. `TotalOrder`) were ingested as string type.
 
-Some numeric measures were read as strings.
+**Fix:** Silver transformations explicitly cast affected columns to the correct numeric types before reporting.
 
-### Fix
-
-Silver transformations cast measures into proper numeric types before reporting.
+---
 
 ## VAT Calculation Ambiguity
 
-### Problem
+**Problem:** VAT-related fields required interpretation — distinguishing VAT percentage from VAT amount caused inconsistencies.
 
-VAT-related fields required cleanup and interpretation before reporting.
+**Fix:** Fact logic was updated to handle VAT values consistently, with explicit defaults where values were missing.
 
-### Fix
-
-Fact logic handled VAT values consistently and defaulted missing values where needed.
+---
 
 ## Power BI Date/Time Mismatch
 
-### Problem
+**Problem:** Date/time field formatting caused relationship and time-intelligence issues in the Power BI model.
 
-Date/time formatting caused relationship and time-intelligence issues.
+**Fix:** The model was simplified to use stable key-based date relationships for production visuals. Time-intelligence experimentation was isolated from the main report.
 
-### Fix
-
-The final model kept stable key-based relationships for production-style reporting.
+---
 
 ## ADF Metadata Migration Issues
 
-### Problem
+**Problem:** Dynamic metadata migration in ADF caused errors around duplicate keys, variable scoping, and stored procedure parameter handling.
 
-Dynamic metadata migration caused errors around duplicate keys, variable usage, and stored procedure parameters.
+**Fix:** Pipeline logic was corrected with proper execution order, parameter mapping, and sequential activity handling.
 
-### Fix
-
-ADF pipeline logic was corrected with proper execution order, parameter mapping, and sequential handling where needed.
+---
 
 ## Logic App Content-Type Error
 
-### Problem
+**Problem:** The Azure DevOps REST API rejected Logic App requests due to an incorrect `Content-Type` header.
 
-Azure DevOps REST API rejected the request because the wrong content type was used.
+**Fix:** The HTTP action was updated to use:
 
-### Fix
-
-The HTTP action used:
-
-application/json-patch+json
-
+```
+Content-Type: application/json-patch+json
+```

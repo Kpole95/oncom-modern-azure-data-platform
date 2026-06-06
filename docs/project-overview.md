@@ -2,42 +2,50 @@
 
 ## Purpose
 
-The Oncom Modern Azure Data Platform is an Azure Data Engineering project built around a global e-commerce and business operations dataset.
+The Oncom Modern Azure Data Platform is an end-to-end Azure data engineering project built around a fictional global e-commerce and business operations dataset.
 
-The goal of the project is to build a practical lakehouse platform that can ingest source data, process it through Raw, Bronze, and Silver layers, prepare curated data for Power BI reporting, and validate data quality using a metadata-driven framework.
+The goal is to build a practical lakehouse platform that ingests source data, processes it through Raw, Bronze, and Silver layers, prepares curated data for Power BI reporting, and validates data quality using a metadata-driven framework.
 
-The project demonstrates real Azure Data Engineering work across storage, compute, orchestration, transformation, reporting, DevOps, and Data Quality.
+The project demonstrates real Azure Data Engineering work across storage, compute, orchestration, transformation, reporting, DevOps delivery, and Data Quality.
+
+---
 
 ## Business Domains
 
 The platform covers three business domains:
 
-* **Purchase**: vendors, parties, purchase orders, purchase items, purchase categories, cost centers, currency, and calendar/fiscal dates.
-* **Sales**: customers, promotions, payment types, sales order lines, VAT, discounts, and sales amounts.
-* **HR**: workers, departments/verticals, employment details, and compensation attributes.
+- **Purchase** — vendors, parties, purchase orders, purchase items, purchase categories, cost centers, currency, and calendar/fiscal dates
+- **Sales** — customers, promotions, payment types, sales order lines, VAT, discounts, and sales amounts
+- **HR** — workers, departments/verticals, employment details, and compensation attributes
 
-A fourth technical domain supports the project:
+A fourth technical domain supports platform operations:
 
-* **Data Quality**: metadata-driven validation rules, SQL metadata migration, Databricks rule execution, bad-record capture, and operational issue tracking.
+- **Data Quality** — metadata-driven validation rules, SQL metadata migration, Databricks rule execution, bad-record capture, and operational issue tracking
+
+---
 
 ## Platform Scope
 
 The implemented platform includes:
 
-* ADLS Gen2 source storage
-* Databricks Raw ingestion
-* Delta Lake Raw storage
-* Bronze Delta tables
-* Silver dimensions and facts
-* Databricks Workflows
-* Power BI reporting model
-* Azure SQL Data Quality metadata
-* Azure Data Factory metadata migration
-* Databricks Data Quality execution notebooks
-* Logic App / Azure DevOps integration for failed checks
+| Component | Description |
+|---|---|
+| ADLS Gen2 | Source and Delta storage |
+| Databricks Raw | CDM/CSV ingestion to Delta |
+| Delta Lake | Raw, Bronze, and Silver storage |
+| Bronze Tables | Unity Catalog registered tables |
+| Silver Layer | Analytics-ready dimensions and facts |
+| Databricks Workflows | Notebook orchestration |
+| Power BI | Star-schema reporting model |
+| Azure SQL | Data Quality metadata store |
+| Azure Data Factory | Incremental metadata migration |
+| Databricks DQ Notebooks | Rule execution and bad-record capture |
+| Logic App / Azure DevOps | Failed check issue tracking |
+
+---
 
 ## Main Outcome
 
-The final project represents a complete Azure data platform implementation with both analytical reporting and Data Quality capabilities.
+The final project represents a complete Azure data platform implementation with both analytical reporting and operational Data Quality capabilities.
 
-It is designed to show practical Azure Data Engineer skills rather than only notebook-level transformations.
+It is designed to demonstrate practical Azure Data Engineer skills — including cloud infrastructure, secure access patterns, lakehouse design, PySpark transformations, orchestration, and reporting — rather than only notebook-level work.

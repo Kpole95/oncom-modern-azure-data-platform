@@ -2,68 +2,87 @@
 
 ## Purpose
 
-Azure DevOps is used for source control, backlog planning, work item tracking, branch management, and bug tracking.
+Azure DevOps provides source control, backlog planning, work item tracking, branch management, and bug tracking for the project.
 
-The project uses DevOps practices to show that the platform was managed like a real delivery project, not just as isolated notebooks.
+DevOps practices were used to show the platform was managed like a real delivery project — not just a collection of isolated notebooks.
+
+---
 
 ## Repository Usage
 
 Azure DevOps Repos were used for:
 
-* Databricks notebook version control
-* Azure Data Factory Git integration
-* commit history
-* branch-based development
-* project tracking evidence
+- Databricks notebook version control
+- Azure Data Factory Git integration
+- Commit history and change tracking
+- Branch-based development workflow
+- Project delivery evidence
+
+---
 
 ## Work Item Structure
 
-Work was organized using:
+Work was organised as:
 
+```
 Epic
   └── Feature / User Story
         └── Task
+```
 
-Project areas include:
+Project areas covered:
 
-* Purchase
-* Sales
-* HR
-* Data Quality
-* Databricks Workflows
-* Power BI Reporting
+- Purchase
+- Sales
+- HR
+- Data Quality
+- Databricks Workflows
+- Power BI Reporting
+
+---
+
+## Backlog
+
+**Purchase and Sales backlog:**
+
+![Azure DevOps Backlog - Purchase and Sales](../screenshots/azure-devops-backlog-purchase-sales.png)
+
+**Data Quality and Workflows backlog:**
+
+![Azure DevOps Backlog - Data Quality and Workflows](../screenshots/azure-devops-backlog-dq-workflows.png)
+
+---
+
+## Work Item Dashboard
+
+The DevOps dashboard tracks active work items, progress, and delivery status across all project areas.
+
+![Azure DevOps Dashboard](../screenshots/azure-devops-dashboard-work-items.png)
+
+---
 
 ## Example Work Items
 
-Examples of tracked work:
+Tracked work items included:
 
-* Purchase Raw notebook development
-* Purchase Bronze notebook development
-* Purchase Silver dimensional modeling
-* Sales Silver model development
-* HR model development
-* Data Quality metadata framework
-* Data Quality rule execution
-* Power BI reporting
-* Workflow orchestration
+- Purchase Raw notebook development
+- Purchase Bronze notebook development
+- Purchase Silver dimensional modeling
+- Sales Silver model development
+- HR model development
+- Data Quality metadata framework design
+- Data Quality rule execution notebooks
+- Power BI reporting
+- Workflow orchestration
+
+---
 
 ## Bug Tracking
 
-Failed Data Quality checks can be connected to Azure DevOps bugs through Logic Apps.
+Failed Data Quality checks are connected to Azure DevOps bug creation through Logic Apps. When a DQ rule fails, a bug is automatically raised for operational follow-up.
 
 Example bug pattern:
 
+```
 DQ Rule Failure: PrimaryKeyCheck failed on vendtable
-
-## Screenshots
-
-Add Azure DevOps screenshots under:
-
-screenshots/devops/
-
-Recommended files:
-
-azure-devops-backlog-purchase-sales.png
-azure-devops-backlog-dq-workflows.png
-azure-devops-dashboard-work-items.png
-azure-devops-bug-created-from-dq.png
+```

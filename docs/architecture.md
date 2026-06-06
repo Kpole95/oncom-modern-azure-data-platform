@@ -2,86 +2,101 @@
 
 ## High-Level Architecture
 
-
-Microsoft Dynamics-style CDM/CSV Export
-        |
-        v
-Azure Data Lake Storage Gen2
-        |
-        v
-Azure Databricks Raw Layer
-        |
-        v
+```
+Microsoft Dynamics-style CDM/CSV Export (ADLS Gen2)
+        │
+        ▼
+Azure Databricks — Raw Layer
+        │
+        ▼
 Delta Lake Raw Storage
-        |
-        v
-Azure Databricks Bronze Tables
-        |
-        v
-Azure Databricks Silver Dimensions and Facts
-        |
-        v
-Databricks Workflows
-        |
-        v
-Power BI Reporting Model
+        │
+        ▼
+Azure Databricks — Bronze Tables (Unity Catalog)
+        │
+        ▼
+Azure Databricks — Silver Dimensions & Facts (Unity Catalog)
+        │
+        ▼
+Databricks Workflows (Orchestration)
+        │
+        ▼
+Power BI Reporting Model (Star Schema)
+```
 
+---
 
 ## Data Quality Flow
 
-
+```
 Azure SQL DQ Metadata Source
-        |
-        v
-Azure Data Factory Incremental Migration
-        |
-        v
+        │
+        ▼
+Azure Data Factory — Incremental Migration
+        │
+        ▼
 Azure SQL DQ Dev Database
-        |
-        v
+        │
+        ▼
 Databricks DQ Rule Execution
-        |
-        v
+        │
+        ▼
 DQ Results + Bad Records
-        |
-        v
+        │
+        ▼
 Failed Results View
-        |
-        v
+        │
+        ▼
 Logic App / Azure DevOps Bug Tracking
+```
 
+---
 
 ## Layer Responsibilities
 
 ### Source Layer
 
-The source layer contains Microsoft Dynamics-style CDM/CSV exports in ADLS Gen2. The data is stored as headerless CSV files with schema information available in CDM JSON metadata files.
+The source layer contains Microsoft Dynamics-style CDM/CSV exports stored in ADLS Gen2. Data arrives as headerless CSV files, with schema information available in accompanying CDM JSON metadata files.
 
 ### Raw Layer
 
-The Raw layer reads source CSV files, applies schemas from CDM metadata, and writes the result as Delta Lake datasets.
+The Raw layer reads source CSV files, applies schemas derived from CDM metadata, and writes the result as Delta Lake datasets.
+
+**Reading a source entity from ADLS:**
+
+![Read Entity from Raw](../screenshots/Read_Entity_raw.png)
+
+**Writing the output to a Delta path:**
+
+![Write to Delta Path - Raw](../screenshots/Write_to_DeltaPath_raw.png)
 
 ### Bronze Layer
 
-The Bronze layer registers Raw Delta outputs as Databricks tables. Bronze keeps the structure close to source while making data queryable and reusable.
+The Bronze layer registers Raw Delta outputs as Databricks tables. Bronze keeps the structure close to source while making data queryable via Spark SQL and reusable for downstream transformations.
+
+**Reading from a Delta path into Bronze:**
+
+![Read from Delta Path - Bronze](../screenshots/Read_from_DeltaPath_bronze.png)
 
 ### Silver Layer
 
-The Silver layer creates analytics-ready dimensions and facts. It applies cleaning, type casting, deduplication, enrichment, joins, date keys, and business calculations.
+The Silver layer creates analytics-ready dimensions and facts. It applies cleaning, type casting, deduplication, enrichment, joins, date key generation, and business calculations.
 
 ### Reporting Layer
 
-Power BI uses the curated Silver tables as its semantic source. The reporting model follows a star-schema structure with fact tables connected to dimensions.
+Power BI consumes curated Silver tables as its semantic source. The reporting model follows a star-schema structure with fact tables joined to dimensions.
 
 ### Data Quality Layer
 
-The Data Quality layer stores metadata in Azure SQL, migrates rule metadata with ADF, executes rules in Databricks, captures bad records, stores execution results, and exposes failed rows for monitoring or bug creation.
+The Data Quality layer stores rule metadata in Azure SQL, migrates rules incrementally with ADF, executes checks in Databricks, captures bad records, stores execution results, and exposes failed rows for monitoring and bug creation.
+
+---
 
 ## Key Design Choices
 
-* Delta Lake is used for reliable lakehouse storage.
-* Databricks is used for PySpark transformations and Data Quality execution.
-* Azure SQL stores DQ rules and execution metadata.
-* Azure Data Factory handles metadata movement and orchestration.
-* Power BI consumes curated Silver-layer outputs.
-* Azure DevOps tracks work items and DQ issues.
+- **Delta Lake** is used for reliable, ACID-compliant lakehouse storage across all layers.
+- **Databricks** handles PySpark transformations, Unity Catalog governance, and DQ execution.
+- **Azure SQL** stores DQ rule metadata and execution results.
+- **Azure Data Factory** handles incremental metadata movement and orchestration.
+- **Power BI** consumes curated Silver-layer outputs via a star-schema model.
+- **Azure DevOps** tracks work items, branches, and DQ-triggered bugs.

@@ -2,9 +2,9 @@
 
 ## Overview
 
-Oncom Modern Azure Data Platform is an end-to-end Azure Data Engineering project built around a fictional global e-commerce and business operations dataset. The platform ingests Microsoft Dynamics-style CDM/CSV exports from Azure Data Lake Storage Gen2, processes the data through a lakehouse medallion architecture, builds analytics-ready dimensional models in Azure Databricks, orchestrates notebook execution through Databricks Workflows, supports metadata-driven data quality validation, and serves curated reporting data into Power BI.
+**Oncom Modern Azure Data Platform** is an end-to-end Azure data engineering project built around a fictional global e-commerce and business operations dataset. The platform ingests Microsoft Dynamics-style CDM/CSV exports from Azure Data Lake Storage Gen2, processes data through a lakehouse medallion architecture (Raw → Bronze → Silver), builds analytics-ready dimensional models in Azure Databricks, orchestrates notebook execution via Databricks Workflows, implements metadata-driven data quality validation, and serves curated reporting data into Power BI.
 
-The project demonstrates practical data engineering work across cloud infrastructure, secure storage access, PySpark transformations, Delta Lake table design, Azure DevOps source control, workflow orchestration, Power BI modeling, and data quality engineering.
+The project demonstrates practical, production-style data engineering across cloud infrastructure, secure storage access, PySpark transformations, Delta Lake table design, Azure DevOps delivery management, workflow orchestration, Power BI star-schema modeling, and data quality engineering.
 
 ---
 
@@ -12,44 +12,41 @@ The project demonstrates practical data engineering work across cloud infrastruc
 
 The platform covers three business domains:
 
-- **Purchase**: vendors, parties, purchase orders, purchase items, purchase categories, currency, cost centers, and fiscal/calendar dates.
-- **Sales**: customers, promotions, payment types, sales order lines, discounts, VAT, and sales order amounts.
-- **HR**: workers, verticals/departments, employment details, and compensation attributes.
+- **Purchase** — vendors, parties, purchase orders, purchase items, purchase categories, currency, cost centers, and fiscal/calendar dates
+- **Sales** — customers, promotions, payment types, sales order lines, discounts, VAT, and sales order amounts
+- **HR** — workers, verticals/departments, employment details, and compensation attributes
 
-A fourth technical domain supports the platform:
+A fourth technical domain supports platform operations:
 
-- **Data Quality**: metadata-driven rule configuration, SQL metadata migration, rule execution patterns, validation result handling, bad-record capture, and operational issue tracking.
+- **Data Quality** — metadata-driven rule configuration, SQL metadata migration, rule execution patterns, validation result handling, bad-record capture, and operational issue tracking
 
 ---
 
 ## Architecture
 
-```text
-Microsoft Dynamics-style CDM/CSV Export
-        |
-        v
-Azure Data Lake Storage Gen2
-        |
-        v
-Azure Databricks Raw Layer
-        |
-        v
-Delta Lake Raw Storage
-        |
-        v
-Azure Databricks Bronze Tables
-        |
-        v
-Azure Databricks Silver Dimensions and Facts
-        |
-        v
-Databricks Workflows
-        |
-        v
-Power BI Reporting Model
+```
+Microsoft Dynamics CDM/CSV Export (ADLS Gen2)
+        │
+        ▼
+Azure Databricks — Raw Layer (Delta Lake)
+        │
+        ▼
+Azure Databricks — Bronze Tables (Unity Catalog)
+        │
+        ▼
+Azure Databricks — Silver Dimensions & Facts (Unity Catalog)
+        │
+        ├──► Databricks Workflows (Orchestration)
+        │
+        └──► Power BI Reporting Model (Star Schema)
+
+Data Quality Path:
+SQL Metadata (Azure SQL) ──► ADF Migration ──► Databricks DQ Execution ──► Failed Results View ──► Logic App / Azure DevOps
 ```
 
-The reporting path uses the Silver layer directly as the curated semantic source for Power BI. A separate Data Quality path uses SQL metadata and Databricks execution notebooks to validate data across lakehouse layers.
+The Silver layer serves as the curated semantic source for Power BI. A parallel Data Quality path uses SQL metadata and Databricks notebooks to validate data across all lakehouse layers.
+
+---
 
 ## Technology Stack
 
@@ -60,15 +57,31 @@ The reporting path uses the Silver layer directly as the curated semantic source
 | Processing | Azure Databricks, PySpark, Spark SQL |
 | Table Format | Delta Lake |
 | Orchestration | Databricks Workflows, Azure Data Factory |
+| Catalog & Governance | Unity Catalog |
 | Metadata Store | Azure SQL Database |
-| Secrets | Azure Key Vault, Databricks Secret Scope |
+| Secrets Management | Azure Key Vault, Databricks Secret Scope |
 | DevOps | Azure DevOps Repos, Branches, Work Items |
 | Reporting | Power BI Desktop |
 | Languages | Python, PySpark, SQL, DAX |
-| Data Quality | Metadata-driven SQL rules, rule execution notebooks, validation outputs |
+| Data Quality | Metadata-driven SQL rules, execution notebooks, validation outputs |
+
+---
+
+## Azure Platform Setup
+
+The project runs in a dedicated Azure resource group containing the core platform services: Azure Data Factory, Azure Databricks, ADLS Gen2, and Azure Key Vault.
+
+![Azure Resource Group Overview](screenshots/azure-resource-group-overview.png)
+
+Azure Cost Management was used throughout development to monitor cloud spend and identify Databricks as the primary cost driver.
+
+![Azure Cost Management](screenshots/azure-cost-management.png)
+
+---
 
 ## Repository Structure
 
+```
 .
 ├── README.md
 ├── docs/
@@ -83,15 +96,6 @@ The reporting path uses the Silver layer directly as the curated semantic source
 │   ├── project-overview.md
 │   ├── resource-setup.md
 │   └── source-data.md
-├── notes/
-│   ├── adls-oauth-utility.md
-│   ├── cdm-read-poc.md
-│   ├── databricks-setup.md
-│   ├── final-project-summary.md
-│   ├── github-push-guide.md
-│   ├── issues-and-blockers.md
-│   ├── lecture-notes.md
-│   └── readme.md
 ├── notebooks/
 │   ├── raw/
 │   ├── bronze/
@@ -99,182 +103,249 @@ The reporting path uses the Silver layer directly as the curated semantic source
 │   ├── data_quality/
 │   └── workflows/
 ├── screenshots/
-│   ├── azure/
-│   ├── databricks/
-│   ├── devops/
-│   ├── dq/
-│   └── powerbi/
 └── sql/
     ├── ddl/
     ├── config/
     ├── procedures/
     └── views/
+```
 
-## Implemented Lakehouse Layers
+---
+
+## Lakehouse Layers
 
 ### Raw Layer
 
-The Raw layer ingests CDM-style headerless CSV files from ADLS Gen2 and stores them as Delta Lake datasets. Because the source files do not contain headers, the ingestion framework reads schema metadata from CDM JSON files and applies explicit Spark schemas before loading the data
+The Raw layer ingests CDM-style headerless CSV files from ADLS Gen2 and persists them as Delta Lake datasets. Because source files contain no headers, the ingestion framework reads schema metadata from CDM JSON descriptor files and applies explicit Spark `StructType` schemas before loading.
 
-Raw ingestion was implemented for:
+Raw ingestion covers:
 
-- Purchase: `Parties`, `PartyAddress`, `VendTable`, `PurchContracts`, `PurchaseOrder`, `PurchItem`, `PurchCategory`
-- Sales: `CustTable`, `PromoTable`, `SalesOrderLine`
-- HR: `WorkerTable`
-- Reference/Others: `Currency`, `FiscalPeriod`, `CostCenter`
+- **Purchase** — `Parties`, `PartyAddress`, `VendTable`, `PurchContracts`, `PurchaseOrder`, `PurchItem`, `PurchCategory`
+- **Sales** — `CustTable`, `PromoTable`, `SalesOrderLine`
+- **HR** — `WorkerTable`
+- **Reference** — `Currency`, `FiscalPeriod`, `CostCenter`
+
+**Ingestion flow — reading an entity from ADLS:**
+
+![Read Entity from Raw](screenshots/Read_Entity_raw.png)
+
+**Writing the output to a Delta path:**
+
+![Write to Delta Path - Raw](screenshots/Write_to_DeltaPath_raw.png)
+
+---
 
 ### Bronze Layer
 
-The Bronze layer registers Raw Delta outputs as Databricks tables. Bronze keeps the source-like structure while making data queryable through Spark SQL and available for downstream transformations.
+The Bronze layer registers Raw Delta outputs as managed Databricks tables in Unity Catalog. Bronze preserves the source-like structure while making data queryable via Spark SQL and available for downstream transformation.
+
+**Reading from Delta path into Bronze:**
+
+![Read from Delta Path - Bronze](screenshots/Read_from_DeltaPath_bronze.png)
+
+**Bronze tables registered in Unity Catalog:**
+
+![Saved in Bronze Schema in Unity Catalog](screenshots/Saved_in_bronze_schema_bronze.png)
 
 Bronze tables include:
 
-- `bronze.parties`
-- `bronze.partyaddress`
-- `bronze.vendtable`
-- `bronze.purchaseorder`
-- `bronze.purchitem`
-- `bronze.purchcategory`
-- `bronze.purchcontracts`
-- `bronze.custtable`
-- `bronze.promotable`
-- `bronze.salesorderline`
-- `bronze.workertable`
-- `bronze.currency`
-- `bronze.fiscalperiod`
-- `bronze.costcenter`
+| Schema | Table |
+|---|---|
+| bronze | parties, partyaddress, vendtable, purchaseorder, purchitem, purchcategory, purchcontracts |
+| bronze | custtable, promotable, salesorderline |
+| bronze | workertable |
+| bronze | currency, fiscalperiod, costcenter |
+
+---
 
 ### Silver Layer
 
-The Silver layer creates analytics-ready dimensions and facts. Transformations include trimming text, timestamp normalization, default date handling, null handling, type casting, business key selection, deduplication, hash-key creation, lookup enrichment, and fact-table calculations.
+The Silver layer creates analytics-ready dimensions and fact tables. Transformations include text trimming, timestamp normalization, default date handling, null handling, type casting, business key selection, deduplication, hash-key generation, lookup enrichment, and fact-table calculations.
 
-Silver tables include:
+**Reading Bronze schema into Silver:**
 
-- `silver.dimdate`
-- `silver.dimparty`
-- `silver.dimvendor`
-- `silver.dimpurchasecategory`
-- `silver.dimpurchitem`
-- `silver.dimcurrency`
-- `silver.dimcostcenter`
-- `silver.factpurchaseorder`
-- `silver.dimcusttable`
-- `silver.dimpromotable`
-- `silver.dimpaymenttypes`
-- `silver.factsalesorderline`
-- `silver.dimvertical`
-- `silver.dimworker`
+![Read Bronze Schema into Silver](screenshots/Read_bronze_schema_silver.png)
+
+**Silver tables registered in Unity Catalog:**
+
+![Table Created in Silver Schema in Unity Catalog](screenshots/Table_created_in_silver_schema_silver.png)
+
+Silver tables:
+
+| Type | Table |
+|---|---|
+| Dimensions | `silver.dimdate`, `silver.dimparty`, `silver.dimvendor`, `silver.dimpurchasecategory`, `silver.dimpurchitem`, `silver.dimcurrency`, `silver.dimcostcenter` |
+| Dimensions | `silver.dimcusttable`, `silver.dimpromotable`, `silver.dimpaymenttypes`, `silver.dimvertical`, `silver.dimworker` |
+| Facts | `silver.factpurchaseorder`, `silver.factsalesorderline` |
+
+---
 
 ## Power BI Reporting
 
-The Power BI model uses star-schema modeling over the Silver layer. The report includes pages such as Home, Vendor Detail, Category Detail, and Time Series. The model uses dimension-to-fact relationships, single-direction filtering, and reusable DAX measures.
+The Power BI model uses star-schema design over the Silver layer, with dimension-to-fact relationships, single-direction filtering, and reusable DAX measures.
 
-Core Purchase relationships:
+**Core Purchase domain relationships:**
 
-dimvendor[VendorId]                  1 → * factpurchaseorder[VendorKey]
-dimpurchasecategory[CategoryId]      1 → * factpurchaseorder[CategoryKey]
-dimpurchitem[ItemId]                 1 → * factpurchaseorder[ItemKey]
-dimdate[DateId]                      1 → * factpurchaseorder[OrderDateKey]
+```
+dimvendor[VendorId]             1 → * factpurchaseorder[VendorKey]
+dimpurchasecategory[CategoryId] 1 → * factpurchaseorder[CategoryKey]
+dimpurchitem[ItemId]            1 → * factpurchaseorder[ItemKey]
+dimdate[DateId]                 1 → * factpurchaseorder[OrderDateKey]
+```
 
-Key measures:
-DAX:
+**Key DAX measures:**
+
+```dax
 Total Purchase Amount = SUM(factpurchaseorder[TotalAmount])
 Total Purchase Orders = COUNT(factpurchaseorder[PoNumber])
-Total Quantity = SUM(factpurchaseorder[Qty])
-Total VAT Amount = SUM(factpurchaseorder[VatAmount])
+Total Quantity        = SUM(factpurchaseorder[Qty])
+Total VAT Amount      = SUM(factpurchaseorder[VatAmount])
+```
 
-## Report Screenshots
+### Report Pages
+
+**Home Dashboard** — top-level KPIs and summary visuals across all purchase activity
+
+![Power BI Home Dashboard](screenshots/HomeDashboard.png)
+
+**Vendor Detail** — per-vendor breakdown of purchase amounts, order counts, and item distribution
+
+![Power BI Vendor Detail](screenshots/VendorDetail.png)
+
+**Category Detail** — purchase performance sliced by procurement category
+
+![Power BI Category Detail](screenshots/CategoryDetail.png)
+
+**Time Series Analysis** — trend analysis of purchase volumes and amounts over fiscal periods
+
+![Power BI Time Series Analysis](screenshots/TimeSeriesAnalysis.png)
+
+---
 
 ## Data Quality Framework
 
-The Data Quality layer uses SQL metadata tables to define rules and Databricks notebooks to execute checks against lakehouse tables. The metadata model supports multiple rule types including primary key checks, record count comparisons, sum checks, and null checks.
+The Data Quality layer uses SQL metadata tables to define rules and Databricks notebooks to execute them against lakehouse tables. The metadata model supports primary key checks, record count comparisons, sum checks, and null checks.
 
-Core SQL metadata objects:
+**Core SQL metadata objects:**
 
-- dqr.dqchecks
-- dqr.dqobjects
-- dqr.dqrules
-- dqr.incremental_load_mappings
-- dqr.sp_UpdateWatermark
-- dqr.Vw_Rules
-- dqr.Vw_DQ_Failed_Results
+| Object | Purpose |
+|---|---|
+| `dqr.dqchecks` | Data quality check types such as primary key, null, record count, and sum checks |
+| `dqr.dqobjects` | Registered lakehouse objects |
+| `dqr.dqrules` | Rule definitions and parameters |
+| `dqr.incremental_load_mappings` | Watermark tracking for incremental loads |
+| `dqr.sp_UpdateWatermark` | Stored procedure for watermark updates |
+| `dqr.Vw_Rules` | Consolidated rule view for execution |
+| `dqr.Vw_DQ_Failed_Results` | Failed validation results for review |
 
+**Operational flow:**
 
-Operational flow:
-
-DQ metadata source
-        |
-        v
+```
+DQ metadata (Azure SQL)
+        │
+        ▼
 ADF incremental migration
-        |
-        v
+        │
+        ▼
 Dev metadata database
-        |
-        v
+        │
+        ▼
 Databricks DQ rule execution
-        |
-        v
-DQ result and bad-record outputs
-        |
-        v
+        │
+        ▼
+DQ result & bad-record outputs
+        │
+        ▼
 Failed-results view
-        |
-        v
-Logic App / Azure DevOps bug tracking
+        │
+        ▼
+Logic App → Azure DevOps bug tracking
+```
 
+**DQ rule execution in Databricks:**
+
+![Databricks DQ Rule Execution](screenshots/databricks-dq-rule-execution.png)
+
+---
+
+## Azure DevOps Work Management
+
+Project delivery was managed in Azure DevOps using Epics, Features, User Stories, work item dashboards, and sprint tracking.
+
+**Backlog — Purchase and Sales domains:**
+
+![Azure DevOps Backlog - Purchase and Sales](screenshots/azure-devops-backlog-purchase-sales.png)
+
+**Backlog — Data Quality and Workflows:**
+
+![Azure DevOps Backlog - Data Quality and Workflows](screenshots/azure-devops-backlog-dq-workflows.png)
+
+**Work item dashboard:**
+
+![Azure DevOps Dashboard](screenshots/azure-devops-dashboard-work-items.png)
+
+---
 
 ## Key Engineering Decisions
 
-### Replaced Legacy CDM Connector
+### Custom CDM Ingestion (Replaced Legacy Connector)
 
-The initial ingestion design expected a Spark CDM connector. The connector was not reliable in the target Databricks runtime, so the platform uses a custom schema-driven ingestion approach:
+The initial design used a Spark CDM connector, which proved unreliable on the target Databricks runtime. The platform was redesigned around a custom schema-driven approach:
 
+```
 CDM JSON metadata
-        |
-        v
+        │
+        ▼
 Dynamic Spark StructType
-        |
-        v
+        │
+        ▼
 Headerless CSV read
-        |
-        v
+        │
+        ▼
 Delta Lake output
+```
 
-This made the ingestion independent of connector/runtime compatibility issues.
+This eliminated connector and runtime compatibility issues entirely, making ingestion portable across Databricks LTS versions.
 
-### Used Databricks Secret Scope
+### Databricks Secret Scope for Credential Management
 
-Credentials are not hardcoded. ADLS and SQL access use Key Vault-backed Databricks secrets.
+Credentials are never hardcoded. All ADLS Gen2 and Azure SQL access uses Key Vault-backed Databricks secret scopes, ensuring no secrets are present in notebook code or version control.
 
-### Used Silver-Layer Deduplication
+### Silver-Layer Deduplication
 
-Dimension keys used in Power BI must be unique. Duplicate handling was implemented in the Silver layer for dimensions such as date, vendor, party, and purchase category.
+Dimension keys exposed to Power BI must be unique to maintain valid relationships. Deduplication logic was implemented in the Silver layer for `dimdate`, `dimvendor`, `dimparty`, and `dimpurchasecategory`.
 
-### Kept Power BI Model Stable
+### Stable Power BI Model
 
-The final Power BI relationship model prioritizes stable star-schema relationships and correct visual behavior. Time-intelligence experimentation was handled separately from the main report model to avoid breaking production-style visuals.
+The production report model prioritises stable star-schema relationships and correct filter propagation. Time-intelligence experiments were isolated from the main model to prevent visual regressions.
 
-## Main Problems Solved
+---
 
-CDM connector compatibility failure
-Headerless CSV ingestion
-Mixed source layouts: entity folders and direct CSV files
-ADLS OAuth configuration errors
-Databricks compute restrictions for Spark filesystem configs
-Duplicate DateId in dimdate
-Duplicate business keys in dimensions
-Delta schema mismatch during type changes
-TotalOrder stored as text instead of numeric
-VAT percentage vs VAT amount ambiguity
-Payment types derived from transactional data
-Power BI relationship direction errors
-Power BI date/time relationship mismatch
-ADF dynamic metadata migration issues
-DQ bad-record capture and failed-result handling
-Logic App integration with Azure DevOps REST API
+## Problems Solved
+
+| Problem | Resolution |
+|---|---|
+| CDM connector compatibility failure | Custom CDM JSON schema-driven ingestion |
+| Headerless CSV ingestion | Schema applied from CDM JSON metadata |
+| Mixed source layouts (entity folders vs. direct CSV) | Flexible path resolution logic |
+| ADLS OAuth configuration errors | Key Vault-backed secret scope |
+| Databricks compute restrictions for Spark filesystem configs | Cluster-level config pattern |
+| Duplicate `DateId` in `dimdate` | Silver-layer deduplication |
+| Duplicate business keys in dimensions | Deduplication before key assignment |
+| Delta schema mismatch during type changes | Schema evolution handling |
+| `TotalOrder` stored as text | Explicit type cast in Silver |
+| VAT percentage vs. VAT amount ambiguity | Source analysis + explicit column naming |
+| Payment types derived from transactional data | Derived dimension pattern |
+| Power BI relationship direction errors | Corrected model relationships |
+| Power BI date/time relationship mismatch | Date key normalisation |
+| ADF dynamic metadata migration issues | Parameterised pipeline redesign |
+| DQ bad-record capture and failed-result handling | Separate bad-record output path |
+| Logic App integration with Azure DevOps REST API | Connector + payload configuration |
+
+---
 
 ## Professional Summary
 
-This project demonstrates a complete Azure Data Engineering workflow: cloud resource setup, secure storage access, data ingestion, medallion architecture, Delta Lake modeling, PySpark transformation logic, Databricks workflow orchestration, SQL metadata management, data quality validation, Azure DevOps delivery practices, and Power BI reporting.
+This project demonstrates a complete, production-style Azure Data Engineering workflow: cloud resource provisioning, secure credential management, CDM data ingestion, medallion lakehouse architecture, Delta Lake table design, PySpark transformation logic, Databricks workflow orchestration, SQL metadata management, metadata-driven data quality validation, Azure DevOps delivery practices, and Power BI star-schema reporting.
 
-It is designed as a practical portfolio project for Azure Data Engineer, Data
+It is designed as a practical portfolio project for Azure Data Engineer, Databricks Engineer, Cloud Data Engineer, and Data Platform Engineer roles.
