@@ -6,16 +6,16 @@
 Microsoft Dynamics-style CDM/CSV Export (ADLS Gen2)
         │
         ▼
-Azure Databricks — Raw Layer
+Azure Databricks -  Raw Layer
         │
         ▼
 Delta Lake Raw Storage
         │
         ▼
-Azure Databricks — Bronze Tables (Unity Catalog)
+Azure Databricks -  Bronze Tables (Unity Catalog)
         │
         ▼
-Azure Databricks — Silver Dimensions & Facts (Unity Catalog)
+Azure Databricks -  Silver Dimensions & Facts (Unity Catalog)
         │
         ▼
 Databricks Workflows (Orchestration)
@@ -32,7 +32,7 @@ Power BI Reporting Model (Star Schema)
 Azure SQL DQ Metadata Source
         │
         ▼
-Azure Data Factory — Incremental Migration
+Azure Data Factory -  Incremental Migration
         │
         ▼
 Azure SQL DQ Dev Database
