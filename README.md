@@ -12,13 +12,13 @@ The project demonstrates practical, production-style data engineering across clo
 
 The platform covers three business domains:
 
-- **Purchase** — vendors, parties, purchase orders, purchase items, purchase categories, currency, cost centers, and fiscal/calendar dates
-- **Sales** — customers, promotions, payment types, sales order lines, discounts, VAT, and sales order amounts
-- **HR** — workers, verticals/departments, employment details, and compensation attributes
+- **Purchase** - vendors, parties, purchase orders, purchase items, purchase categories, currency, cost centers, and fiscal/calendar dates
+- **Sales** - customers, promotions, payment types, sales order lines, discounts, VAT, and sales order amounts
+- **HR** - workers, verticals/departments, employment details, and compensation attributes
 
 A fourth technical domain supports platform operations:
 
-- **Data Quality** — metadata-driven rule configuration, SQL metadata migration, rule execution patterns, validation result handling, bad-record capture, and operational issue tracking
+- **Data Quality** - metadata-driven rule configuration, SQL metadata migration, rule execution patterns, validation result handling, bad-record capture, and operational issue tracking
 
 ---
 
@@ -28,13 +28,13 @@ A fourth technical domain supports platform operations:
 Microsoft Dynamics CDM/CSV Export (ADLS Gen2)
         │
         ▼
-Azure Databricks — Raw Layer (Delta Lake)
+Azure Databricks - Raw Layer (Delta Lake)
         │
         ▼
-Azure Databricks — Bronze Tables (Unity Catalog)
+Azure Databricks - Bronze Tables (Unity Catalog)
         │
         ▼
-Azure Databricks — Silver Dimensions & Facts (Unity Catalog)
+Azure Databricks - Silver Dimensions & Facts (Unity Catalog)
         │
         ├──► Databricks Workflows (Orchestration)
         │
@@ -120,12 +120,12 @@ The Raw layer ingests CDM-style headerless CSV files from ADLS Gen2 and persists
 
 Raw ingestion covers:
 
-- **Purchase** — `Parties`, `PartyAddress`, `VendTable`, `PurchContracts`, `PurchaseOrder`, `PurchItem`, `PurchCategory`
-- **Sales** — `CustTable`, `PromoTable`, `SalesOrderLine`
-- **HR** — `WorkerTable`
-- **Reference** — `Currency`, `FiscalPeriod`, `CostCenter`
+- **Purchase** - `Parties`, `PartyAddress`, `VendTable`, `PurchContracts`, `PurchaseOrder`, `PurchItem`, `PurchCategory`
+- **Sales** - `CustTable`, `PromoTable`, `SalesOrderLine`
+- **HR** - `WorkerTable`
+- **Reference** - `Currency`, `FiscalPeriod`, `CostCenter`
 
-**Ingestion flow — reading an entity from ADLS:**
+**Ingestion flow - reading an entity from ADLS:**
 
 ![Read Entity from Raw](screenshots/Read_Entity_raw.png)
 
@@ -204,19 +204,19 @@ Total VAT Amount      = SUM(factpurchaseorder[VatAmount])
 
 ### Report Pages
 
-**Home Dashboard** — top-level KPIs and summary visuals across all purchase activity
+**Home Dashboard** - top-level KPIs and summary visuals across all purchase activity
 
 ![Power BI Home Dashboard](screenshots/HomeDashboard.png)
 
-**Vendor Detail** — per-vendor breakdown of purchase amounts, order counts, and item distribution
+**Vendor Detail** - per-vendor breakdown of purchase amounts, order counts, and item distribution
 
 ![Power BI Vendor Detail](screenshots/VendorDetail.png)
 
-**Category Detail** — purchase performance sliced by procurement category
+**Category Detail** - purchase performance sliced by procurement category
 
 ![Power BI Category Detail](screenshots/CategoryDetail.png)
 
-**Time Series Analysis** — trend analysis of purchase volumes and amounts over fiscal periods
+**Time Series Analysis** - trend analysis of purchase volumes and amounts over fiscal periods
 
 ![Power BI Time Series Analysis](screenshots/TimeSeriesAnalysis.png)
 
@@ -272,11 +272,11 @@ Logic App → Azure DevOps bug tracking
 
 Project delivery was managed in Azure DevOps using Epics, Features, User Stories, work item dashboards, and sprint tracking.
 
-**Backlog — Purchase and Sales domains:**
+**Backlog - Purchase and Sales domains:**
 
 ![Azure DevOps Backlog - Purchase and Sales](screenshots/azure-devops-backlog-purchase-sales.png)
 
-**Backlog — Data Quality and Workflows:**
+**Backlog - Data Quality and Workflows:**
 
 ![Azure DevOps Backlog - Data Quality and Workflows](screenshots/azure-devops-backlog-dq-workflows.png)
 
