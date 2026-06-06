@@ -14,13 +14,13 @@ The project demonstrates real Azure Data Engineering work across storage, comput
 
 The platform covers three business domains:
 
-- **Purchase** — vendors, parties, purchase orders, purchase items, purchase categories, cost centers, currency, and calendar/fiscal dates
-- **Sales** — customers, promotions, payment types, sales order lines, VAT, discounts, and sales amounts
-- **HR** — workers, departments/verticals, employment details, and compensation attributes
+- **Purchase** - vendors, parties, purchase orders, purchase items, purchase categories, cost centers, currency, and calendar/fiscal dates
+- **Sales** - customers, promotions, payment types, sales order lines, VAT, discounts, and sales amounts
+- **HR** - workers, departments/verticals, employment details, and compensation attributes
 
 A fourth technical domain supports platform operations:
 
-- **Data Quality** — metadata-driven validation rules, SQL metadata migration, Databricks rule execution, bad-record capture, and operational issue tracking
+- **Data Quality** - metadata-driven validation rules, SQL metadata migration, Databricks rule execution, bad-record capture, and operational issue tracking
 
 ---
 
@@ -48,4 +48,4 @@ The implemented platform includes:
 
 The final project represents a complete Azure data platform implementation with both analytical reporting and operational Data Quality capabilities.
 
-It is designed to demonstrate practical Azure Data Engineer skills — including cloud infrastructure, secure access patterns, lakehouse design, PySpark transformations, orchestration, and reporting — rather than only notebook-level work.
+It is designed to demonstrate practical Azure Data Engineer skills - including cloud infrastructure, secure access patterns, lakehouse design, PySpark transformations, orchestration, and reporting - rather than only notebook-level work.
