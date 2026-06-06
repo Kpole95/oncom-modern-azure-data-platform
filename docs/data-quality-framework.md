@@ -73,10 +73,10 @@ Failed rows exposed via dqr.Vw_DQ_Failed_Results
 
 The metadata model supports:
 
-- **Primary Key checks** — verify uniqueness of key columns
-- **Null checks** — detect unexpected null values in required fields
-- **Record count checks** — compare row counts across layers or time windows
-- **Sum checks** — validate aggregated measure totals
+- **Primary Key checks** - verify uniqueness of key columns
+- **Null checks** - detect unexpected null values in required fields
+- **Record count checks** - compare row counts across layers or time windows
+- **Sum checks** - validate aggregated measure totals
 
 ---
 
