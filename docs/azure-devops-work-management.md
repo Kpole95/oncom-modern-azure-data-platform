@@ -4,7 +4,7 @@
 
 Azure DevOps provides source control, backlog planning, work item tracking, branch management, and bug tracking for the project.
 
-DevOps practices were used to show the platform was managed like a real delivery project — not just a collection of isolated notebooks.
+DevOps practices were used to show the platform was managed like a real delivery project -  not just a collection of isolated notebooks.
 
 ---
 
