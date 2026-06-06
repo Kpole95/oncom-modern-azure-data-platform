@@ -4,7 +4,7 @@
 
 The source data follows a Microsoft Dynamics-style export pattern. The project starts from files already present in Azure Data Lake Storage Gen2.
 
-The platform does not build the upstream export process — it focuses on lakehouse ingestion, transformation, validation, and reporting from those files.
+The platform does not build the upstream export process - it focuses on lakehouse ingestion, transformation, validation, and reporting from those files.
 
 ---
 
